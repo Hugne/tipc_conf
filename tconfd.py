@@ -4,12 +4,13 @@ import sys
 import BaseHTTPServer
 import json
 import re
+from avahiservice import AvahiService
+from log import err, warn, info
 
 CONFIG_FILE = './config.json'
 LEASE_FILE = './lease.json' #Whenever we give a "lease", store it here
 HOST_NAME = 'localhost' # Default to only serve config to local containers
 PORT_NUMBER = 1337 # No
-
 
 ##
 # HTTP request handler
@@ -41,7 +42,7 @@ class TconfHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 ##
 # HTTP server implementation
 #
-class TipcConfigServer(BaseHTTPServer.HTTPServer):
+class TipcConfigServer(BaseHTTPServer.HTTPServer, AvahiService):
 
     lease_fp = None
     lease_json = None
@@ -50,18 +51,21 @@ class TipcConfigServer(BaseHTTPServer.HTTPServer):
     last_lease = None
 
     def initialize(self):
+        if not (self.publish(name="TipcConfigService")):
+            warn('Is the AVAHI daemon running?')
+            sys.exit(1)
         try:
             self.config_fp = open(CONFIG_FILE, 'r')
             self.config_json = json.load(self.config_fp)
         except:
-            print 'No configuration found'
+            err('No configuration found')
             sys.exit(1)
         try:
             self.lease_fp = open(LEASE_FILE, 'r+')
             self.lease_json =json.load(self.lease_fp)
             return
         except:
-            print 'No leasefile found'
+            info('No leasefile found')
             self.create_leasefile()
 
     def create_leasefile(self):
@@ -71,10 +75,10 @@ class TipcConfigServer(BaseHTTPServer.HTTPServer):
             self.lease_fp.flush()
             self.lease_fp.seek(0,0)
             self.lease_json = json.load(self.lease_fp)
-            print 'New leasefile created'
+            info('New leasefile created')
             return
         except IOError as e:
-            print 'Failed to create lease file: %s' %e.msg
+            err('Failed to create lease file: %s' %e.msg)
             sys.exit(1)
 
 
@@ -99,7 +103,7 @@ class TipcConfigServer(BaseHTTPServer.HTTPServer):
             sa = self.config_json['start']
         ea = self.config_json['end']
         if (sa == ea):
-            print 'Address pool exhausted!'
+            err('Address pool exhausted!')
             return None
         re_addr = re.compile('(\d*).(\d*).(\d*)')
         tipc_addr = re_addr.search(sa).groups()
@@ -132,11 +136,12 @@ class TipcConfigServer(BaseHTTPServer.HTTPServer):
 if __name__ == '__main__':
     httpd = TipcConfigServer((HOST_NAME, PORT_NUMBER), TconfHttpRequestHandler)
     httpd.initialize()
-    print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
+    info(time.asctime(), "Server started - %s:%s" % (HOST_NAME, PORT_NUMBER))
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+    httpd.unpublish()
     httpd.server_close()
-    print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
+    info(time.asctime(), "Server stopped - %s:%s" % (HOST_NAME, PORT_NUMBER))
 
