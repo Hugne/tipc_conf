@@ -6,13 +6,14 @@ from log import err, warn, info
 class AvahiService:
 
     def publish(self, name, servicetype="_http._tcp", TXT="", host="", port=1337,
-                domain="local"):
+                domain="local", af=avahi.PROTO_INET):
         self.name = name
         self.servicetype = servicetype
         self.TXT = TXT
         self.host = host
         self.port = port
         self.domain = domain
+
         try:
             bus = dbus.SystemBus()
             server = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
@@ -21,7 +22,7 @@ class AvahiService:
             group = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
                                    server.EntryGroupNew()),
                                    avahi.DBUS_INTERFACE_ENTRY_GROUP)
-            group.AddService(avahi.IF_UNSPEC, avahi.PROTO_UNSPEC, dbus.UInt32(0),
+            group.AddService(avahi.IF_UNSPEC, af, dbus.UInt32(0),
                              self.name, self.servicetype, self.domain, self.host,
                              dbus.UInt16(self.port), self.TXT)
             group.Commit()

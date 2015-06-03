@@ -9,7 +9,7 @@ from log import err, warn, info
 
 CONFIG_FILE = './config.json'
 LEASE_FILE = './lease.json' #Whenever we give a "lease", store it here
-HOST_NAME = 'localhost' # Default to only serve config to local containers
+HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 1337 # No
 
 ##
@@ -51,7 +51,7 @@ class TipcConfigServer(BaseHTTPServer.HTTPServer, AvahiService):
     last_lease = None
 
     def initialize(self):
-        if not (self.publish(name="TipcConfigService")):
+        if not (self.publish(name="TipcConfigService", host="", TXT={"?show_leases", "?request_config"})):
             warn('Is the AVAHI daemon running?')
             sys.exit(1)
         try:
