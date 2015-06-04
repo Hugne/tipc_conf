@@ -86,6 +86,7 @@ class TipcConfigServer(BaseHTTPServer.HTTPServer, AvahiService):
         for n in self.lease_json['leases']:
             if (n['clientip'] == client_ip):
                 return n
+        return None
 
     def writelease(self):
         self.lease_fp.seek(0)
