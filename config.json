@@ -4,7 +4,16 @@
 	"bearers": [
 		{
 		"media": "eth",
-		"interface": "eth0"
+		"interface": "eth0",
+		"tolerance": "1500",
+		"window": "200",
+		"priority": "1"
+		},
+		{
+		"media": "udp",
+		"localip": "147.214.213.188",
+		"localport": "6118",
+		"name" : "test"
 		}
 	]
 }
