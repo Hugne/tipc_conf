@@ -1,2 +1,4 @@
 lease.json
 *.pyc
+client/*.o
+client/client
