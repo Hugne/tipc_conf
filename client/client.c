@@ -24,6 +24,7 @@ static int set_media_prop(const char *media, const char *key,
 			  const unsigned int val)
 {
 	char buf[MNL_SOCKET_BUFFER_SIZE];
+	struct nlmsghdr *nlh;
 	struct nlattr *props;
 	struct nlattr *attrs;
 	int prop;
@@ -46,6 +47,7 @@ static int set_media_prop(const char *media, const char *key,
 	props = mnl_attr_nest_start(nlh, TIPC_NLA_MEDIA_PROP);
 	mnl_attr_put_u32(nlh, prop, val);
 	mnl_attr_nest_end(nlh, props);
+	mnl_attr_nest_end(nlh, attrs);
 	return msg_doit(nlh, NULL, NULL);
 }
 
@@ -164,13 +166,13 @@ static int do_one_bearer(json_t *b)
 	data = json_object_get(b, "tolerance");
 	if (data) {
 		bc.tol = json_string_value(data);
-		if (set_media_prop(media, "tolerance", atoi(bc.tol)))
+		if (set_media_prop(bc.media, "tolerance", atoi(bc.tol)))
 			fprintf(stderr, "Failed to set tolerance\n");
 	}
 	data = json_object_get(b, "window");
 	if (data) {
 		bc.win = json_string_value(data);
-		if (set_media_prop(media, "window", atoi(bc.win)))
+		if (set_media_prop(bc.media, "window", atoi(bc.win)))
 			fprintf(stderr, "Failed to set window\n");
 	}
 	/*Optional: Bearer domain*/
