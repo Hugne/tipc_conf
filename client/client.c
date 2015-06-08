@@ -1,36 +1,35 @@
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <curl/curl.h>
+#include <jansson.h>
 
 #include "resolver.h"
+#include "http.h"
 
 #define SERVICE_NAME "TipcConfigService"
-
-static void print_ss(struct sockaddr_storage *ss){
-	char hoststr[NI_MAXHOST];
-	char portstr[NI_MAXSERV];
-	socklen_t cl = sizeof(*ss);
-	int rc = getnameinfo((struct sockaddr *)ss, cl, hoststr,
-			     sizeof(hoststr), portstr, sizeof(portstr),
-			     NI_NUMERICHOST | NI_NUMERICSERV);
-	if (rc == 0) printf("Resolved %s to: %s %s\n",
-			    SERVICE_NAME, hoststr, portstr);
-
-}
 
 int main(int argc, char *argv[])
 {
 	struct sockaddr_storage ss;
+	char url[255];
+	char *response;
 
 	if (!resolve(SERVICE_NAME, &ss)) {
-		printf("Failed to resolve %s\n", SERVICE_NAME);
+		fprintf(stderr, "Failed to resolve %s\n", SERVICE_NAME);
 		return -1;
 	}
-	print_ss(&ss);
-
-
+	build_url(&ss, "?request_config", url, sizeof(url));
+	printf("%s\n",url);
+	response = curlreq(url);
+	if (!response) {
+		fprintf(stderr, "No response received from server (%s)\n", url);
+		return -1;
+	}
+	printf("%s", response);
 
 	return 0;
 }

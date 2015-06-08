@@ -1,13 +1,15 @@
 CFLAGS= -m64 -std=gnu99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual \
         -Wstrict-prototypes -Wmissing-prototypes -Werror
 
-LDFLAGS= -lavahi-core -lavahi-common -lpthread --static
+DFLAGS= -DCURL_STATICLIB
+
+LDFLAGS= -lavahi-core -lavahi-common -lpthread -lcurl #--static
 
 .PHONY: all
 all: client
 
 client: client.c resolver.c
-	gcc resolver.c client.c $(CFLAGS) $(LDFLAGS) -o $@
+	gcc http.c resolver.c client.c $(DFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 
 .PHONY: clean
 clean:

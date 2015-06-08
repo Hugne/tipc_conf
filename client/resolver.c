@@ -143,7 +143,7 @@ int resolve(const char *name, struct sockaddr_storage *ss)
 			e.name, avahi_strerror(avahi_server_errno(e.srv)));
 		goto out_err;
 	}
-	/*Wait until resolved*/
+	/*Wait until resolved, or timeout*/
 	avahi_simple_poll_loop(poll);
 out_err:
 	avahi_server_config_free(&sc);
