@@ -118,7 +118,7 @@ class TipcConfigServer(BaseHTTPServer.HTTPServer, AvahiService):
         lease = '{"clientip" : "%s", "tipcaddress" : "%s"}' % (client_ip, sa)
         self.lease_json['leases'].append(json.loads(lease))
         self.writelease()
-        return sa
+        return json.loads(lease)
 
     def getbearers(self, client_address):
         return self.config_json['bearers']

@@ -104,8 +104,11 @@ static int configure_tipc_address(json_t *addrconf)
 		return -1;
 	}
 	tipcaddr = json_object_get(addrconf, "tipcaddress");
-	if (json_is_string(tipcaddr))
-		printf("TIPC address: %s\n", json_string_value(tipcaddr));
+	if (!json_is_string(tipcaddr)) {
+		fprintf(stderr, "TIPC address missing from configuration\n");
+		return -1;
+	}
+
 	addr = str2addr(json_string_value(tipcaddr));
 	
 	if (!(nlh = msg_init(buf, TIPC_NL_NET_SET))) {

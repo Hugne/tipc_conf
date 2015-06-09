@@ -3,7 +3,7 @@ CFLAGS= -m64 -std=gnu99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual \
 
 DFLAGS= -DCURL_STATICLIB
 
-LDFLAGS= -lavahi-core -lavahi-common -lpthread -lcurl -ljansson -lmnl#--static
+LDFLAGS= -lavahi-core -lavahi-common -lpthread -lcurl -ljansson -lmnl
 
 .PHONY: all
 all: client
