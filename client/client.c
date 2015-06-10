@@ -329,9 +329,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Failed to resolve %s\n", SERVICE_NAME);
 		return -1;
 	}
-	build_url(&ss, "?request_config", url, sizeof(url));
-	printf("%s\n",url);
-	response = curlreq(url);
+	response = httpget(&ss, "?request_config");
 	if (!response) {
 		fprintf(stderr, "No response received from server (%s)\n", url);
 		return -1;

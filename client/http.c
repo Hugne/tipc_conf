@@ -7,13 +7,57 @@
 
 #define BUFFER_SIZE  (256 * 1024)  /* 256 KB */
 
+#ifndef USE_CURL
+char *httpget(struct sockaddr_storage *server, const char *page) {
+	int sock;
+	int res;
+	int sent = 0;
+	char get[128] = { 0 };
+	char *response, *json;
+
+	if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+		perror("Could not create TCP socket\n");
+		return NULL;
+	}
+
+	if (connect(sock, (struct sockaddr*)server, sizeof(*server)) < 0) {
+		perror("Could not connect to server\n");
+		return NULL;
+	}
+	if (!(response = malloc(BUFFER_SIZE))) {
+		fprintf(stderr, "Failed to allocate response buffer\n");
+		return NULL;
+	}
+
+	snprintf(get, 128, "GET /%s HTTP/1.1\r\n User-Agent: TIPC\r\n\r\n",
+		 page);
+	do {
+		res = send(sock, get+sent, strlen(get) - sent, 0);
+		if (res < 0) {
+			perror("Failed to send query\n");
+			return NULL;
+		}
+		sent += res;
+	} while (sent < strlen(get));
+
+	if (recv(sock, response, BUFFER_SIZE, MSG_WAITALL) < 0) {
+		perror("recv");
+		return NULL;
+	}
+	/*Strip HTML header and return pure json*/
+	json = strdup(strstr(response, "\r\n\r\n"));
+	free(response);
+	return json;
+}
+
+#else
 struct write_result
 {
 	char *data;
 	int pos;
 };
 
-char *build_url(struct sockaddr_storage *ss, const char *cmd,
+static char *build_url(struct sockaddr_storage *ss, const char *cmd,
 		char *buf, int len)
 {
 	char h[NI_MAXHOST];
@@ -44,11 +88,11 @@ static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream)
 	return size * nmemb;
 }
 
-
-char *curlreq(const char *url) {
+char *httpget(struct sockaddr_storage *server, const char *page) {
 	CURL *curl = NULL;
 	CURLcode status;
 	struct curl_slist *headers = NULL;
+	char url[255];
 	char *data = NULL;
 	long code;
 	struct write_result write_result;
@@ -60,6 +104,8 @@ char *curlreq(const char *url) {
 	data = malloc(BUFFER_SIZE);
 	if(!data)
 	        goto error;
+
+	build_url(server, page, url, sizeof(url));
 	write_result.data = data;
 	write_result.pos = 0;
 	curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -94,5 +140,7 @@ error:
 	curl_global_cleanup(); 
 	return NULL;
 }
+
+#endif
 
 

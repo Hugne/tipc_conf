@@ -1,9 +1,12 @@
 CFLAGS= -m64 -std=gnu99 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual \
         -Wstrict-prototypes -Wmissing-prototypes -Werror
 
-DFLAGS= -DCURL_STATICLIB
+LDFLAGS= -lavahi-core -lavahi-common -lpthread -ljansson -lmnl
 
-LDFLAGS= -lavahi-core -lavahi-common -lpthread -lcurl -ljansson -lmnl
+ifdef USE_CURL
+LDFLAGS += -lcurl
+CFLAGS += -DUSE_CURL
+endif
 
 .PHONY: all
 all: client
