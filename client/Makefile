@@ -8,6 +8,11 @@ LDFLAGS += -lcurl
 CFLAGS += -DUSE_CURL
 endif
 
+ifdef STATIC
+LDFLAGS += --static
+endif
+
+
 .PHONY: all
 all: client
 
