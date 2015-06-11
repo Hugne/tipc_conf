@@ -1,7 +1,7 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <netdb.h>
-#include <curl/curl.h>
 
 #include "http.h"
 
@@ -51,6 +51,8 @@ char *httpget(struct sockaddr_storage *server, const char *page) {
 }
 
 #else
+#include <curl/curl.h>
+
 struct write_result
 {
 	char *data;
