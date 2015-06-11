@@ -20,7 +20,8 @@ PKG_CHECK_MODULES([LIBMNL], [libmnl])
 PKG_CHECK_MODULES([LIBJANSSON], [jansson])
 PKG_CHECK_MODULES([LIBAVAHICORE], [avahi-core])
 #Fix for broken AVAHI pkg-config, avahi-core depends on avahi-common
-LIBAVAHICORE_LIBS+="-lavahi-common"
+#This only seems to be broken on Ubuntu
+#LIBAVAHICORE_LIBS+="-lavahi-common"
 
 # Checks for header files.
 
