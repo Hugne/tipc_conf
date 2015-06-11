@@ -5,7 +5,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <curl/curl.h>
 #include <jansson.h>
 #include <linux/genetlink.h>
 #include <libmnl/libmnl.h>
